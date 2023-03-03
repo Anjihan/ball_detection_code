@@ -1,0 +1,62 @@
+opencv예제연습.py : 예제 10.12 -> 코드실행이 안되는데 왜안되는지 모르겠음
+
+연습2.py : yolo8을 이용 -> Pytorch: conda 환경에서 구동(인터프리터)
+
+연습3.py : 예제 10.7과 동일 -> roi를 지정해서 추적 
+	  backP상에서는 나름 잘 추적 -> 색으로 추적하는듯?
+
+	(코드)
+	meanShift, CamShift -> 히스토그램 역투영 이용
+	
+	(1)
+	meanShift : 물체의 크기변화 없이 주어진 윈도우 크기대로 물체 중심점 추적
+	cv2.meanShift(probImage, window, criteria) -> retval(탐색 반복횟수), window(추적결과윈도우)
+	probImage: 물체 히스토그램 역투영 -> cv2.BackProject()로 계산
+	criteria: 탐색종료 조건 (최대 반복회수와 오차로 설정)(cv2.TERM_CRITERIA_MAX_ITER or cv2.TERM_CRITERIA_COUNT // cv2.TERM_VRITERIA_EPS)
+	
+	(2)
+	CamShift  : 물체의 중심점, 크기, 회전 추적
+	cv2.CamShift(probImage, window, criteria) -> 
+	box(회전 가능한 박스) -> cv2.ellipse()로 표시 or cv2.BoxPoints()로 박스 모서리 점 검출 
+	window(직사각형 추적 윈도우)
+	
+연습4.py : 예제 10.11와 동일 -> roi를 지정해서 추적(물체의 속도, 비선형 움직임 고려x) -> cv2.meanShift로 추적한 빨간색 사각형을 cv2.KalmanFilter로 추정한 파란색 사각형이 따라 움직임
+	(코드)
+	Kalman Filter -> 측정값으로부터 오차를 최소로 하는 추정값을 반복적으로 추정
+	
+	cv2.KalmanFilter([dynamParams, measureParams[,controlParams[, type]]])
+	-> <kalmanFilter object>
+	칼만 필터 클래스 객체 생성 / dynamParams(상대 벡터), measureParams(측정 벡터), controlParams(외부 제어 벡터) 
+	
+	cv2.kalmanFilter.predixt([control]) -> retval
+	칼만 필터의 예측상태 (predicted state)statePre 계산
+
+	cv2.KalmanFilter.correct(measurement) -> retval
+	관찰/측정 벡터 measurement를 사용해서 상태 정정, statePost를 반환
+
+연습6.py : 좌표읽는 코드
+
+연습7, 9.py : opencv 3대 버전에서만 실행가능 -> Pytorch2:conda 가상환경에서 이용
+	
+	트랙커 객체를 이용해서 추적 -> 사람이 가리고나면 추적 끊김
+
+연습8.py : opencv를 이용해서 색을 추적하는 예제
+	
+	-> 소화기(같은 색의 물체도 같이 검출함)도 같이 잡힘
+
+연습10.py -> 선영이가 가져온 예제(동일하게 tracker 생성)
+	 -> roi를 물체보다 훨씬 크게 지정해야됨 + 추적 끊긴뒤에는 다시 회복 x 
+
+
+
+
+
+=>> 느낀점
+opencv를 이용시 (1)공의 색을 검출 or (2) ROI를 지정해서 추적하는 방법이있음 or (3) hough변환 이용하는 방법 -> 어디간겨
+색 검출시에 공의 색이나 특징이 얼마나 명확한지 + 주변에 공의 특징과 동일한 물체가 있는지 여부에 따라 오류발생가능
+ROI지정시에 관측자의 움직임 + 공의 움직임에 따라 공의 시직경이 변하는걸 잘 인식하지 못함 + 사람이 앞을 한번 가리면 다시 검출을 못함
+hough변환시에 매개변수 조정을 많이 해봐도 깔끔하게 잡지는 못했음
+
+YOLO좋은 모델을 찾거나 Opencv에 학습을 이용해서 공이 학습된 모델을 쓰는게 확실히 좋아보인다 |^__^/  
+
+더해볼것 : yolo좀더 좋은 버전이나 모델 찾기 , 예제 10.14해보면서 opencv 추적기 나머지 성능테스트
